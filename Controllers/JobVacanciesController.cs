@@ -6,6 +6,7 @@
     using DevJobs.API.Persistence.Repositories;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
+    using Serilog;
 
     [Route("api/job-vacancies")]
     [ApiController]
@@ -55,9 +56,12 @@
         /// <param name="model">Dados da vaga.</param>
         /// <returns>Objeto recém criado.</returns>
         /// <response code="201">Sucesso.</response>
+        /// <response code="400">Dados inválidos.</response>
         [HttpPost]
         public IActionResult Post(AddJobVacancyInputModel model)
         {
+            Log.Information("POST JobVacancy chamado");
+
             var jobVacancy = new JobVacancy(
                 model.Title,
                 model.Description,
@@ -65,6 +69,11 @@
                 model.IsRemote,
                 model.SalaryRange
             );
+
+            if (jobVacancy.Title.Length > 30)
+            {
+                return BadRequest("O título precisa ter menos de 30 caracteres.");
+            }
 
             _repository.Add(jobVacancy);
 
